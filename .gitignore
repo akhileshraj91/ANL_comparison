@@ -1,3 +1,8 @@
 models_CC_cluster/
 *preliminaries*
 data_directory/
+data_dirCC_control
+trace_dirCC_control
+models_backup/
+*.png
+*.yaml

@@ -16,6 +16,9 @@ import cerberus
 import ruamel.yaml
 
 import nrm.tooling as nrm
+from stable_baselines3 import PPO
+import new_code_normalized_Action as ncna
+
 
 
 # frequency (in hertz) for RAPL sensor polling
@@ -43,7 +46,7 @@ LOGS_CONF = {
     'handlers': {
         'file': {
             'class': 'logging.FileHandler',
-            'filename': f'//home/cc/compare_control_methods/experiment_data/CC_control/{LOGGER_NAME}.log',
+            'filename': f'//home/cc/compare_control_methods/experiment_data/CC_RL_control/{LOGGER_NAME}.log',
             'mode': 'w',
             'level': LOGS_LEVEL,
             'formatter': 'precise',
@@ -201,7 +204,7 @@ assert DUMPED_MSG_TYPES.issubset(CSV_FIELDS)
 
 def initialize_csvwriters(stack: contextlib.ExitStack):
     csvfiles = {
-        msg_type: stack.enter_context(open(f'/home/cc/compare_control_methods/experiment_data/CC_control/dump_{msg_type}.csv', 'w'))
+        msg_type: stack.enter_context(open(f'/home/cc/compare_control_methods/experiment_data/CC_RL_control/dump_{msg_type}.csv', 'w'))
         for msg_type in DUMPED_MSG_TYPES
     }
 
@@ -265,57 +268,7 @@ def dump_upstream_msg(csvwriters, msg):
         csvwriter.writerow(row)
 
 
-# controller logic & configuration  ###########################################
 
-# The system is approximated as a first order linear system.
-# The controller is implemented as a Proportional-Integral (PI) controller.
-#
-# The configuration of the controller is divided in three sections:
-#
-# 1. RAPL characterization  -----
-#
-#   The effective power consumption does not exactly match the powercap
-#   command.
-#   The deviation is modeled as an affine relation:
-#       power consumption = f(powercap)
-#                         = config['rapl']['slope'] * powercap + config['rapl']['offset']
-#
-#   where:
-#     - config['rapl']['slope'] is unitless
-#     - config['rapl']['offset'] is in Watt
-#
-#
-# 2. model parameters  -----
-#
-#   The system is modeled with the following equation:
-#       progress = f(powercap)
-#                = config['model']['gain'] * (1 - exp(-config['model']['alpha'] * (powercap - config['model']['beta'])))
-#
-#   where:
-#     - config['model']['alpha'] is in 1/Watt
-#     - config['model']['beta'] is in Watt
-#     - config['model']['gain'] is in Hertz
-#
-#   The benchmark/cluster modelization impacts config['model']['alpha'] and
-#   config['model']['beta'] parameters.
-#
-#   The relationship between the powercap and the progress (i.e., progress as a
-#   function of powercap) is modeled with a first-order linear approximation.
-#   It is configured by the config['model']['gain'] and
-#   config['model']['time-constant'] parameters.
-#
-#
-# 3. controller parameters  -----
-#
-#   The controller is configured with the following parameters:
-#    - config['controller']['setpoint'] (unitless):
-#        A value in the continuous interval [0, 1] representing the level of
-#        performance to achieve (as a proportion of the maximum performance).
-#    - config['controller']['response-time'] (in second):
-#        5% response time (defined as 3·τ)
-#    - config['controller']['power-range'] (in Watt):
-#        A pair (low, high) — where low < high — of value representing the
-#        range of powercap values the controller is allowed to use.
 
 
 class PIController:
@@ -364,7 +317,9 @@ class PIController:
         # see model equation
         return (-math.log(-value) / self._model_alpha + self._model_beta - self._rapl_offset) / self._rapl_slope
 
-    def control(self, csvwriters):
+    def control(self, csvwriters, model_file):
+        self.dynamics = model_file
+        self.model = PPO.load(self.dynamics)
         while not self.daemon.all_finished():
             msg = self.daemon.upstream_recv()  # blocking call
             dump_upstream_msg(csvwriters, msg)
@@ -393,22 +348,13 @@ class PIController:
         timestamp *= 1e-6  # convert µs in s
         for data in measures:
             if data['sensorID'].startswith('RaplKey'):
-                # collect sensors
                 window_duration = timestamp - self.rapl_window_timestamp
                 progress_estimation = self._estimate_progress(self.heartbeat_timestamps)
-
-                # estimate current error
-                error = self.progress_setpoint - progress_estimation
-
-                # compute command with linear equation
-                self.powercap_linear = \
-                        window_duration * self._integral_gain * error + \
-                        self._proportional_gain * (error - self.prev_error) + \
-                        self.powercap_linear
-
-                # thresholding (ensure powercap remains in controller power range)
-                #   this can be done in the linear space as the variable change
-                #   is monotic (increasing as self._model_alpha > 0)
+                obs = [progress_estimation]
+                action, _states = self.model.predict(obs, deterministic=True)
+                ab_action = ncna.abnormal_action(action)
+                powercap = ab_action[0]
+                #print(">>>>>>>>>>>>>>>>>>>>>>>>>>>",powercap)
                 self.powercap_linear = max(
                     min(
                         self.powercap_linear,
@@ -417,21 +363,11 @@ class PIController:
                     self._powercap_linear_min
                 )
 
-                # delinearize to get actual actuator value
-                powercap = self._delinearize(self.powercap_linear)
-
-                # propagate state
-                self.prev_error = error
-
-                # reset monitoring variables for new upcoming RAPL window
                 self.rapl_window_timestamp = timestamp
                 self.heartbeat_timestamps = self.heartbeat_timestamps[-1:]
-
-                # send command to actuator
-                powercap = round(powercap)  # XXX: discretization induced by raplActions
+                powercap = round(powercap)
                 enforce_powercap(self.daemon, self.rapl_actuators, powercap)
 
-                # we treat all RAPL packages at once, ignore other RAPL sensors
                 break
 
 
@@ -483,7 +419,8 @@ def collect_rapl_actuators(daemon):
     return rapl_actuators
 
 
-def launch_application(config, daemon_cfg, workload_cfg, *, sleep_duration=0.5):
+def launch_application(config, daemon_cfg, workload_cfg, RLM, *, sleep_duration=0.5):
+    #print(">>>>>>>>>>>>>>>>>>>>",RLM)
     with nrm.nrmd(daemon_cfg) as daemon:
         # collect RAPL actuators
         rapl_actuators = collect_rapl_actuators(daemon)
@@ -510,7 +447,7 @@ def launch_application(config, daemon_cfg, workload_cfg, *, sleep_duration=0.5):
             csvwriters = initialize_csvwriters(stack)
 
             controller = PIController(config, daemon, rapl_actuators)
-            controller.control(csvwriters)
+            controller.control(csvwriters, RLM)
 
 
 # main script  ################################################################
@@ -531,6 +468,7 @@ def cli(args=None):
 
 
 def run(options, cmd):
+    RLM = cmd[-1]
     # daemon configuration
     daemon_cfg = {
         'raplCfg': {
@@ -555,7 +493,7 @@ def run(options, cmd):
     # workload configuration (i.e., app description + manifest)
     workload_cfg = {
         'cmd': cmd[0],
-        'args': cmd[1:],
+        'args': cmd[1:-1],
         'sliceID': 'sliceID',  # XXX: bug in pynrm/hnrm if missing or None (should be generated?)
         'manifest': {
             'app': {
@@ -582,10 +520,11 @@ def run(options, cmd):
 
     logger.info(f'daemon_cfg={daemon_cfg}')
     logger.info(f'workload_cfg={workload_cfg}')
-    launch_application(options.config, daemon_cfg, workload_cfg)
+    launch_application(options.config, daemon_cfg, workload_cfg, RLM)
     logger.info('successful execution')
 
 
 if __name__ == '__main__':
     options, cmd = cli()
+    # print("options are", options, "and commands are " , cmd)
     run(options, cmd)

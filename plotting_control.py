@@ -72,7 +72,7 @@ axes.set_xlabel('Energy consumption [kJ]')
 
 
 # experiment_dir = str(cluster)+'/'
-experiment_dir = './models_CC_cluster/'
+experiment_dir = './experiment_data/models_CC_cluster/'
 clusters = next(os.walk(experiment_dir))[2] # clusters are name of folders
 
 sample_no = 549

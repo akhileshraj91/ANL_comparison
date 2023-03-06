@@ -23,8 +23,8 @@ declare -r PROBLEM_SIZE='33_554_432'
 # configuration  --------------------------------------------------------------
 
 declare -r LOGDIR='./experiment_data'  # all relative paths are relative to $LOGDIR
-declare -r DATADIR='./experiment_inputs/control_SP'
-declare -r OUTPUTDIR='./experiment_data/CC_control'
+declare -r DATADIR='./experiment_data/models_CC_cluster'
+declare -r OUTPUTDIR='./experiment_data/CC_RL_control'
 
 declare -r PARAMS_FILE='parameters.yaml'
 declare -r TOPOLOGY_FILE='topology.xml'
@@ -107,29 +107,30 @@ function snapshot_system_state {
 	rm --recursive --force -- "${wd}"
 }
 
+echo "$DATADIR"
 
 for cfg in "$DATADIR"/*
 do
-        if [[ ${cfg} == *"setpoint"* ]]; then
+        if [[ ${cfg} == *"dynamics"* ]]; then
+	        echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${cfg}"
                 timestamp="$(date --iso-8601=seconds)"
                 archive="${OUTPUTDIR}/preliminaries_${BENCHMARK}_${timestamp}.tar"
-                echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${cfg}"
                 dump_parameters "${timestamp}" "${RUNNER}" "${cfg}" "${BENCHMARK}" "--iterationCount=${ITERATION_COUNT} --problemSize=${PROBLEM_SIZE}"
                 lstopo --output-format xml --whole-system --force "${OUTPUTDIR}/${TOPOLOGY_FILE}"
                 tar --create --file="${archive}" --files-from=/dev/null
                 tar --append --file="${archive}" --transform='s,^.*/,,' -- "${cfg}"
                 tar --append --file="${archive}" --directory="${OUTPUTDIR}" -- "${PRERUN_SNAPSHOT_FILES[@]}"
                 snapshot_system_state "${archive}" 'pre'
-                python controller.py ${cfg} -- ones-stream-full 33554432 10000
+                python ./increased_sampling_rate/RL_model_hardware.py ./increased_sampling_rate/max-range-config.yaml -- ones-stream-full 33554432 10000 ${cfg}
                 # retrieve benchmark logs and snapshot post-run state
                 tar --append --file="${archive}" --directory="${OUTPUTDIR}" -- "${POSTRUN_SNAPSHOT_FILES[@]}"
-		touch "${OUTPUTDIR}/SUCCESS"
+		        touch "${OUTPUTDIR}/SUCCESS"
                 tar --append --file="${archive}" --directory="${OUTPUTDIR}" -- SUCCESS
                 snapshot_system_state "${archive}" 'post'
                 # compress archive
                 xz --compress "${archive}"
+	        python ./increased_sampling_rate/enforce_max_power.py ./increased_sampling_Rate/max-range-config.yaml -- ones-stream-full 100 100 $new_name
                 echo __________________________________________________________________________________________________
         fi
 
 done
-
