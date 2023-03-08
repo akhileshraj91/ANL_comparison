@@ -129,7 +129,7 @@ do
                 snapshot_system_state "${archive}" 'post'
                 # compress archive
                 xz --compress "${archive}"
-	        python ./increased_sampling_rate/enforce_max_power.py ./increased_sampling_Rate/max-range-config.yaml -- ones-stream-full 100 100 $new_name
+	        python ./increased_sampling_rate/enforce_max_power.py ./increased_sampling_rate/max-range-config.yaml
                 echo __________________________________________________________________________________________________
         fi
 

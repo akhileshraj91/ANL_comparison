@@ -99,13 +99,16 @@ do
 		tar --append --file="${archive}" --transform='s,^.*/,,' -- "${cfg}"
 		tar --append --file="${archive}" --directory="${OUTPUTDIR}" -- "${PRERUN_SNAPSHOT_FILES[@]}"
 		snapshot_system_state "${archive}" 'pre'
-		python identification.py --enable-libnrm ${cfg} -- ones-stream-full 33554432 10000
+		python identification.py --enable-libnrm ${cfg} -- ones-stream-full 33554422 10000
 		# retrieve benchmark logs and snapshot post-run state
 		tar --append --file="${archive}" --directory="${OUTPUTDIR}" -- "${POSTRUN_SNAPSHOT_FILES[@]}"
 		snapshot_system_state "${archive}" 'post'
 		# compress archive
 		xz --compress "${archive}"
-        	echo __________________________________________________________________________________________________
+		sleep 1
+		python ./increased_sampling_rate/enforce_max_power.py ./increased_sampling_rate/max-range-config.yaml
+        	sleep 1
+		echo __________________________________________________________________________________________________
 	fi
 
 done

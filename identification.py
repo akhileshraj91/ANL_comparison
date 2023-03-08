@@ -502,7 +502,7 @@ def run(options, cmd):
     # configure libnrm instrumentation if required
     if options.libnrm:
         workload_cfg['manifest']['app']['instrumentation'] = {
-            'ratelimit': {'hertz': 1_000_000},
+            'ratelimit': {'hertz': 100_000_000},
         }
 
     logger.info(f'daemon_cfg={daemon_cfg}')

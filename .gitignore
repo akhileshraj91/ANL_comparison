@@ -6,3 +6,4 @@ trace_dirCC_control
 models_backup/
 *.png
 *.yaml
+*.pdf
