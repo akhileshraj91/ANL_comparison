@@ -18,8 +18,8 @@
     <info name="Backend" value="Linux"/>
     <info name="LinuxCgroup" value="/"/>
     <info name="OSName" value="Linux"/>
-    <info name="OSRelease" value="5.4.0-139-generic"/>
-    <info name="OSVersion" value="#156-Ubuntu SMP Fri Jan 20 17:27:18 UTC 2023"/>
+    <info name="OSRelease" value="5.4.0-144-generic"/>
+    <info name="OSVersion" value="#161-Ubuntu SMP Fri Feb 3 14:49:04 UTC 2023"/>
     <info name="HostName" value="akhilesh-02-14-5"/>
     <info name="Architecture" value="x86_64"/>
     <info name="hwlocVersion" value="2.7.1"/>
@@ -199,7 +199,7 @@
         <object type="PCIDev" gp_index="153" pci_busid="0000:00:17.0" pci_type="0106 [8086:a182] [1028:0715] 09" pci_link_speed="0.000000"/>
         <object type="Bridge" gp_index="154" bridge_type="1-1" depth="1" bridge_pci="0000:[01-01]" pci_busid="0000:00:1c.0" pci_type="0604 [8086:a190] [1028:0715] f9" pci_link_speed="1.230769">
           <object type="PCIDev" gp_index="159" pci_busid="0000:01:00.0" pci_type="0200 [8086:1521] [1028:1f9a] 01" pci_link_speed="1.230769">
-            <object type="OSDev" gp_index="173" name="eth2" osdev_type="2">
+            <object type="OSDev" gp_index="172" name="eth1" osdev_type="2">
               <info name="Address" value="24:6e:96:62:b3:e6"/>
             </object>
           </object>
@@ -223,7 +223,7 @@
             </object>
           </object>
           <object type="PCIDev" gp_index="166" pci_busid="0000:18:00.1" pci_type="0200 [8086:1572] [1028:0000] 01" pci_link_speed="7.876923">
-            <object type="OSDev" gp_index="172" name="eth1" osdev_type="2">
+            <object type="OSDev" gp_index="173" name="eth2" osdev_type="2">
               <info name="Address" value="24:6e:96:62:b3:c8"/>
             </object>
           </object>
@@ -450,6 +450,6 @@
   <support name="membind.get_area_memlocation"/>
   <support name="custom.exported_support"/>
   <cpukind cpuset="0x0000ffff,0xffffffff">
-    <info name="FrequencyBaseMHz" value="2400"/>
+    <info name="FrequencyBaseMHz" value="2600"/>
   </cpukind>
 </topology>

@@ -304,5 +304,41 @@ for cluster in clusters:
     print('α - [1/W]: '+str(round(power2perf_params[cluster][0],3)))
     print('power offset - β - [W]: '+str(round(power2perf_params[cluster][2],1)))
     print('linear gain - K_L - [Hz]]: '+str(round(power2perf_params[cluster][1],1)))
+
+
+with open(r'./experiment_inputs/control_SP/gros_setpoint-53.yaml') as file:
+    parameters = yaml.full_load(file)
+    print(type(parameters), parameters)
+    parameters['rapl']['slope'] = str(round(power_parameters[cluster][0],2))
+    parameters['rapl']['offset'] = str(round(power_parameters[cluster][1],2))
+    parameters['model']['alpha'] = str(round(power2perf_params[cluster][0],3))
+    parameters['model']['beta'] = str(round(power2perf_params[cluster][2],1))
+    parameters['model']['gain'] = str(round(power2perf_params[cluster][1],1))
+    print(parameters)
+
+# # parameters = pd.DataFrame()
+# # parameters['version'] = 1
+# # parameters['rapl'] = pd.DataFrame()
+# # parameters['model'] = pd.DataFrame()
+# # parameters['controller'] = pd.DataFrame()
+# # parameters['rapl']['slope'] = round(power_parameters[cluster][0],2)
+# # parameters['rapl']['offset'] = round(power_parameters[cluster][1],2)
+# # parameters['model']['alpha'] = round(power2perf_params[cluster][0],3)
+# # parameters['model']['beta'] = round(power2perf_params[cluster][2],1)
+# # parameters['model']['gain'] = round(power2perf_params[cluster][1],1)
+# # parameters['model']['time-constant'] = round(0.33)
+# # parameters['controller']['setpoint'] = round(0.99)
+# # parameters['controller']['response-time'] = round(30)
+# # parameters['controller']['power-range'] = [40, 120]
+#
+# params = pd.DataFrame()
+# params.insert('version',1)
+# params.insert('rapl',['slope','offset'],[1,2])
+
+
+
+with open(r'./experiment_data/params.yaml','w') as file2:
+    yaml.dump(parameters, file2)
+
     
     
