@@ -18,6 +18,8 @@ from datetime import datetime
 #
 #fig, axs = plt.subplots(2)
 #fig.suptitle('power and performance against time')
+now = datetime.now()
+
 
 a = {'gros': 0.83, 'dahu': 0.94, 'yeti': 0.89,'CC_RL_control': 0.92}
 b = {'gros': 7.07, 'dahu': 0.17, 'yeti': 2.91, 'CC_RL_control': 0.88}
@@ -39,7 +41,15 @@ pareto = {}
 #
 for trace in traces[cluster][0]:
      data[cluster][trace]['aggregated_values']['energy'] = np.nansum([np.nansum([data[cluster][trace]['rapl_sensors']['value'+str(package_number)].iloc[i+1]*data[cluster][trace]['aggregated_values']['rapls_periods'].iloc[i][0] for i in range(0,len(data[cluster][trace]['aggregated_values']['rapls_periods'].index))]) for package_number in range(0,4)])
-pareto[cluster] = pd.DataFrame({'Execution Time':[data[cluster][trace]['aggregated_values']['progress_frequency_median']['median'].index[-1] for trace in traces[cluster][0]]},index=[data[cluster][trace]['aggregated_values']['energy']/10**3 for trace in traces[cluster][0]])
+     nof = data[cluster][trace]['weights'][0]
+     ind1 = nof.find('_')
+     ind2 = nof.find('___')
+     c_1 = round(float(nof[ind1+1:ind2]),1)
+     c_2 = round(float(nof[ind2+3:]),1)
+     # print(c_1,c_2)
+     data[cluster][trace]['label'] = (c_1,c_2)
+     print(data[cluster][trace]['label'])
+pareto[cluster] = pd.DataFrame({'Execution Time':[data[cluster][trace]['aggregated_values']['progress_frequency_median']['median'].index[-1] for trace in traces[cluster][0]],'Labels': [data[cluster][trace]['label'] for trace in traces[cluster][0]]},index=[data[cluster][trace]['aggregated_values']['energy']/10**3 for trace in traces[cluster][0]])
 pareto[cluster].sort_index(inplace=True)
 #
 #
@@ -52,6 +62,20 @@ cmap = cm.get_cmap('viridis')
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(6.6,6.6))
 cb = axes.scatter(pareto[cluster].index,pareto[cluster]['Execution Time'], marker='.', c='r', s=30, label='RL-Controller')
 
+x_data = pareto[cluster].index
+y_data = pareto[cluster]['Execution Time']
+z_data = pareto[cluster]['Labels'].iloc()
+print(x_data)
+print(y_data)
+print(z_data)
+# print(len(x_data),len(y_data),len(z_data))
+
+fig2,axes2 = plt.subplots(nrows=1,ncols=1,figsize=(6.6,6.6))
+for i,data in enumerate(zip(x_data,y_data)):
+     axes2.plot(data[0],data[1])
+     axes2.text(data[0],data[1],z_data[i],fontsize=2)
+
+fig2.savefig("./figures_normal/result_"+str(now)+".pdf")
 
 # axes.grid(True)
 # axes.set_ylabel('Execution time [s]')
@@ -83,24 +107,25 @@ execution_time_power = pareto[cluster].index*pareto[cluster]['Execution Time']
 cmap = cm.get_cmap('viridis')
 #
 # fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(6.6,6.6))
-cb = axes.scatter(pareto[cluster].index,pareto[cluster]['Execution Time'], marker='.', c='k', s=30, label='PI-Controller')
+cb = axes.scatter(pareto[cluster].index,pareto[cluster]['Execution Time'], marker='.', c=(1-pareto[cluster]['setpoint']), cmap=cmap, s=50, label='PI-Controller')
 
 # #plt.show()
-#plt.colorbar(cb,label='Degradation $\epsilon$ [unitless]')
+# axes.colorbar(cb,label='Degradation $\epsilon$ [unitless] for varying setpoints.')
 axes.grid(True)
 axes.set_ylabel('Execution time [s]')
 axes.set_xlabel('Energy consumption [kJ]')
 axes.legend()
+title = "Comparing RL and PI controller with varying reward fucntions and varying setpoints."
+axes.set_title(title,fontsize=8)
 ##########################################################################################################################
 
 
 
 
-now = datetime.now()
 
 
-plt.savefig("./figures_normal/result_"+str(now)+".pdf")
-plt.savefig("./figures_normal/result_"+str(now)+".png")
+# plt.savefig("./figures_normal/result_"+str(now)+".pdf")
+# plt.savefig("./figures_normal/result_"+str(now)+".png")
 
 
-plt.show()
+# plt.show()

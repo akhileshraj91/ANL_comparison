@@ -134,9 +134,10 @@ for trace in traces[cluster][0]:
         [rapl_elapsed_time[t] - rapl_elapsed_time[t - 1] for t in range(1, len(rapl_elapsed_time))],
         index=[rapl_elapsed_time[t] for t in range(1, len(rapl_elapsed_time))], columns=['periods'])
     # Progress
+    Progress_data = data[cluster][trace]['performance_sensors'].loc[:,'progress'].values.copy()
     performance_elapsed_time = data[cluster][trace]['performance_sensors'].index
     data[cluster][trace]['aggregated_values']['performance_frequency'] = pd.DataFrame(
-        [1 / (performance_elapsed_time[t] - performance_elapsed_time[t - 1]) for t in
+        [Progress_data[t] / (performance_elapsed_time[t] - performance_elapsed_time[t - 1]) for t in
          range(1, len(performance_elapsed_time))],
         index=[performance_elapsed_time[t] for t in range(1, len(performance_elapsed_time))], columns=['frequency'])
     # Execution time:

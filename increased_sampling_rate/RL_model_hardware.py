@@ -331,9 +331,9 @@ class PIController:
                 self._update_measure(payload)
 
     def _update_progress(self, payload):
-        timestamp, _, _ = payload
+        timestamp, _, value = payload
         timestamp *= 1e-6  # convert µs in s
-        self.heartbeat_timestamps.append(timestamp)
+        self.heartbeat_timestamps.append((timestamp,value))
 
     @staticmethod
     def _estimate_progress(heartbeat_timestamps):

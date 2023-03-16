@@ -45,7 +45,7 @@ data = {}
 data[cluster] = {}
 
 for trace in traces[cluster][0]:
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",trace)
+    # print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",trace)
     data[cluster][trace] = {}
     folder_path = experiment_dir + cluster + '/' + trace
     # Trace experimental plan: parameters or log
@@ -67,6 +67,9 @@ for trace in traces[cluster][0]:
     data[cluster][trace]['enforce_powercap']['powercap'] = [
         ''.join(c for c in data[cluster][trace]['enforce_powercap']['message'][i] if c.isdigit()) for i in
         data[cluster][trace]['enforce_powercap'].index]
+    all_files = os.listdir(folder_path)
+    data[cluster][trace]['weights'] = [file for file in all_files if os.path.isfile(os.path.join(folder_path, file)) and file.startswith('dynamics')]
+    print(">>>>>>>>>>>>>>>",data[cluster][trace]['weights'])
     # Loading sensors data files
     pubMeasurements = pd.read_csv(folder_path + "/dump_pubMeasurements.csv")
     pubProgress = pd.read_csv(folder_path + "/dump_pubProgress.csv")
@@ -128,9 +131,10 @@ for trace in traces[cluster][0]:
         [rapl_elapsed_time[t] - rapl_elapsed_time[t - 1] for t in range(1, len(rapl_elapsed_time))],
         index=[rapl_elapsed_time[t] for t in range(1, len(rapl_elapsed_time))], columns=['periods'])
     # Progress
+    Progress_data = data[cluster][trace]['performance_sensors'].loc[:,'progress'].values.copy()
     performance_elapsed_time = data[cluster][trace]['performance_sensors'].index
     data[cluster][trace]['aggregated_values']['performance_frequency'] = pd.DataFrame(
-        [1 / (performance_elapsed_time[t] - performance_elapsed_time[t - 1]) for t in
+        [Progress_data[t] / (performance_elapsed_time[t] - performance_elapsed_time[t - 1]) for t in
          range(1, len(performance_elapsed_time))],
         index=[performance_elapsed_time[t] for t in range(1, len(performance_elapsed_time))], columns=['frequency'])
     # Execution time:

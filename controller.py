@@ -376,9 +376,10 @@ class PIController:
                 self._update_measure(payload)
 
     def _update_progress(self, payload):
-        timestamp, _, _ = payload
+        timestamp, _, value = payload
         timestamp *= 1e-6  # convert µs in s
-        self.heartbeat_timestamps.append(timestamp)
+        self.heartbeat_timestamps.append((timestamp,value))
+        #self.heartbeat_timestamps.append(timestamp)
 
     @staticmethod
     def _estimate_progress(heartbeat_timestamps):
@@ -387,6 +388,7 @@ class PIController:
             #1 / (second - first)
             #for first, second in zip(heartbeat_timestamps, heartbeat_timestamps[1:])
         #)
+        #print(heartbeat_timestamps)
         return statistics.median(((second[1])/ (second[0] - first[0]))
             for first, second in zip(heartbeat_timestamps, heartbeat_timestamps[1:]))
 
