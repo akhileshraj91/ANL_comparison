@@ -70,12 +70,12 @@ print(y_data)
 print(z_data)
 # print(len(x_data),len(y_data),len(z_data))
 
-fig2,axes2 = plt.subplots(nrows=1,ncols=1,figsize=(6.6,6.6))
+# fig2,axes2 = plt.subplots(nrows=1,ncols=1,figsize=(6.6,6.6))
 for i,data in enumerate(zip(x_data,y_data)):
-     axes2.plot(data[0],data[1])
-     axes2.text(data[0],data[1],z_data[i],fontsize=2)
+     # axes.plot(data[0],data[1])
+     axes.text(data[0]+0.03,data[1]+0.03,z_data[i],fontsize=2)
 
-fig2.savefig("./figures_normal/result_"+str(now)+".pdf")
+# fig2.savefig("./figures_normal/result_"+str(now)+".pdf")
 
 # axes.grid(True)
 # axes.set_ylabel('Execution time [s]')
@@ -110,7 +110,7 @@ cmap = cm.get_cmap('viridis')
 cb = axes.scatter(pareto[cluster].index,pareto[cluster]['Execution Time'], marker='.', c=(1-pareto[cluster]['setpoint']), cmap=cmap, s=50, label='PI-Controller')
 
 # #plt.show()
-# axes.colorbar(cb,label='Degradation $\epsilon$ [unitless] for varying setpoints.')
+fig.colorbar(cb,label='Degradation $\epsilon$ [unitless] for varying setpoints.')
 axes.grid(True)
 axes.set_ylabel('Execution time [s]')
 axes.set_xlabel('Energy consumption [kJ]')
@@ -124,8 +124,8 @@ axes.set_title(title,fontsize=8)
 
 
 
-# plt.savefig("./figures_normal/result_"+str(now)+".pdf")
+fig.savefig("./figures_normal/result_"+str(now)+".pdf")
 # plt.savefig("./figures_normal/result_"+str(now)+".png")
 
 
-# plt.show()
+plt.show()
