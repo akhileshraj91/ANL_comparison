@@ -131,6 +131,7 @@ do
                 xz --compress "${archive}"
 	        python ./increased_sampling_rate/enforce_max_power.py ./increased_sampling_rate/max-range-config.yaml
                 echo __________________________________________________________________________________________________
+		sleep 5
         fi
 
 done

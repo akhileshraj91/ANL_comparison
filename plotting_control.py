@@ -72,50 +72,49 @@ axes.set_xlabel('Energy consumption [kJ]')
 
 
 # experiment_dir = str(cluster)+'/'
-#experiment_dir = './experiment_data/models_CC_cluster/'
-#clusters = next(os.walk(experiment_dir))[2] # clusters are name of folders
+experiment_dir = './experiment_data/models_CC_cluster/'
+clusters = next(os.walk(experiment_dir))[2] # clusters are name of folders
 
 #sample_no = 549
 # optimal_mat = []
 # dyn_c = 0
-#for dynamics in clusters:
- #   if "dynamics" in dynamics:
-  #      ind1 = dynamics.find('_')
-   #     ind2 = dynamics.find('___')
+for dynamics in clusters:
+   if "dynamics" in dynamics:
+       ind1 = dynamics.find('_')
+       ind2 = dynamics.find('___')
         # print(ind1,ind2,ind3)
-    #    c_1 = round(float(dynamics[ind1+1:ind2]),2)
-     #   c_2 = round(float(dynamics[ind2+3:]),2)
+       c_1 = round(float(dynamics[ind1+1:ind2]),2)
+       c_2 = round(float(dynamics[ind2+3:]),2)
         # print(dynamics)
-      #  model = PPO.load(experiment_dir+dynamics)
-       # iterations = [10000]
-
-        #for et in iterations:
-         #   count = 0
-          #  dones = False
-           # env = ncna.Custom_env(et)
+       model = PPO.load(experiment_dir+dynamics)
+       iterations = [10000]
+       for et in iterations:
+        count = 0
+        dones = False
+        env = ncna.Custom_env(et)
             
-            #obs = env.observation_space.sample()
-            #energy = 0
-            #actions = []
-            #performances = []
-            #while not dones:
-                #action, _states = model.predict(obs,deterministic=True)
-                #obs, rewards, dones, info = env.step(action)
-                #performances.append(ncna.abnormal_obs(obs))
-                #ab_action = ncna.abnormal_action(action)
-                #consumed_power = a[cluster]*ab_action+b[cluster]
-                # energy += ncna.abnormal_action(action)
-                #energy += consumed_power
-                #actions.append(ncna.abnormal_action(action))
-                #obs = obs.reshape((1,))
-                #count += 1
+        obs = env.observation_space.sample()
+        energy = 0
+        actions = []
+        performances = []
+        while not dones:
+            action, _states = model.predict(obs,deterministic=True)
+            obs, rewards, dones, info = env.step(action)
+            performances.append(ncna.abnormal_obs(obs))
+            ab_action = ncna.abnormal_action(action)
+            consumed_power = a[cluster]*ab_action+b[cluster]
+            energy += ncna.abnormal_action(action)
+            energy += consumed_power
+            actions.append(ncna.abnormal_action(action))
+            obs = obs.reshape((1,))
+            count += 1
 
-            #optimal_val = energy/1000
-            # optimal_mat.append(optimal_val)
-            #axes.scatter(optimal_val,count,c='r', s=10, marker='*')
- #           plt.text(optimal_val,count,(str(c_1)+","+str(c_2)))
-            #sample_no += 1
-            #plt.draw()
+        optimal_val = energy/1000 # to convert into KJ
+        # optimal_mat.append(optimal_val)
+        axes.scatter(optimal_val,count,c='r', s=10, marker='*')
+        plt.text(optimal_val,count,(str(c_1)+","+str(c_2)))
+        # sample_no += 1
+        plt.draw()
         # dyn_c+=1
         # if dyn_c > 10:
         #     break
@@ -124,5 +123,6 @@ now = datetime.now()
 
 
 plt.savefig("./figures_normal/result_"+str(now)+".png")
+plt.savefig("./figures_normal/result_"+str(now)+".pdf")
 
 plt.show()

@@ -209,11 +209,8 @@ def _update_progress(self, payload):
 @staticmethod
 def _estimate_progress(heartbeat_timestamps):
     """Estimate the heartbeats' frequency given a list of heartbeats' timestamps."""
-    return statistics.median(
-        1 / (second - first)
-        for first, second in zip(heartbeat_timestamps, heartbeat_timestamps[1:])
-    )
-
+    return statistics.median(((second[1])/ (second[0] - first[0]))
+            for first, second in zip(heartbeat_timestamps, heartbeat_timestamps[1:]))
 
 def _update_measure(self, payload):
     timestamp, measures = payload

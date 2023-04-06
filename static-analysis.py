@@ -10,7 +10,7 @@ Created on Mon Oct 19 09:27:26 2020
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import yaml
+import ruamel.yaml
 import math
 # For data modeling
 import scipy.optimize as opt
@@ -19,7 +19,11 @@ import tarfile
 from matplotlib import cm
 import seaborn as sns
 import warnings
+import yaml
+yaml_format = ruamel.yaml.YAML()
 warnings.filterwarnings('ignore')
+
+
 
 # =============================================================================
 # Experiment selection and load data
@@ -120,7 +124,10 @@ for cluster in clusters:
         data[cluster][trace]['aggregated_values']['rapls_periods'] = pd.DataFrame([rapl_elapsed_time[t]-rapl_elapsed_time[t-1] for t in range(1,len(rapl_elapsed_time))], index=[rapl_elapsed_time[t] for t in range(1,len(rapl_elapsed_time))], columns=['periods'])
             # Progress
         performance_elapsed_time = data[cluster][trace]['performance_sensors'].index
-        data[cluster][trace]['aggregated_values']['performance_frequency'] = pd.DataFrame([1/(performance_elapsed_time[t]-performance_elapsed_time[t-1]) for t in range(1,len(performance_elapsed_time))], index=[performance_elapsed_time[t] for t in range(1,len(performance_elapsed_time))], columns=['frequency'])
+        #data[cluster][trace]['aggregated_values']['performance_frequency'] = pd.DataFrame([performance_elapsed_time[t]/(performance_elapsed_time[t]-performance_elapsed_time[t-1]) for t in range(1,len(performance_elapsed_time))], index=[performance_elapsed_time[t] for t in range(1,len(performance_elapsed_time))], columns=['frequency'])
+        progress_data = data[cluster][trace]['performance_sensors'].loc[:,'progress'].values.copy()
+
+        data[cluster][trace]['aggregated_values']['performance_frequency'] = pd.DataFrame([progress_data[t]/(performance_elapsed_time[t]-performance_elapsed_time[t-1]) for t in range(1,len(performance_elapsed_time))], index=[performance_elapsed_time[t] for t in range(1,len(performance_elapsed_time))], columns=['frequency'])
         # Execution time:
         data[cluster][trace]['aggregated_values']['execution_time'] = performance_elapsed_time[-1]
         data[cluster][trace]['aggregated_values']['upsampled_timestamps'] = data[cluster][trace]['rapl_sensors'].index
@@ -326,13 +333,13 @@ for cluster in clusters:
 
 
 with open(r'./experiment_inputs/control_SP/gros_setpoint-53.yaml') as file:
-    parameters = yaml.full_load(file)
+    parameters = yaml_format.load(file)
     print(type(parameters), parameters)
-    parameters['rapl']['slope'] = str(round(power_parameters[cluster][0],2))
-    parameters['rapl']['offset'] = str(round(power_parameters[cluster][1],2))
-    parameters['model']['alpha'] = str(round(power2perf_params[cluster][0],3))
-    parameters['model']['beta'] = str(round(power2perf_params[cluster][2],1))
-    parameters['model']['gain'] = str(round(power2perf_params[cluster][1],1))
+    parameters['rapl']['slope'] = float(round(power_parameters[cluster][0],2))
+    parameters['rapl']['offset'] = float(round(power_parameters[cluster][1],2))
+    parameters['model']['alpha'] = float(round(power2perf_params[cluster][0],3))
+    parameters['model']['beta'] = float(round(power2perf_params[cluster][2],1))
+    parameters['model']['gain'] = float(round(power2perf_params[cluster][1],1))
     print(parameters)
 
 # # parameters = pd.DataFrame()
@@ -357,7 +364,7 @@ with open(r'./experiment_inputs/control_SP/gros_setpoint-53.yaml') as file:
 
 
 with open(r'./experiment_data/params.yaml','w') as file2:
-    yaml.dump(parameters, file2)
+    yaml_format.dump(parameters, file2)
 
     
 # plt.show()    

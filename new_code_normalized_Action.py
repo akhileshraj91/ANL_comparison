@@ -5,7 +5,7 @@ import random                                                                   
 import matplotlib.pyplot as plt                                                                                         # plotting tool
 from stable_baselines3 import PPO                                                                                       # Import PPO from stable baselines3. For more information please refer to https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html
 import math                                                                                                             # mathematical functions
-
+import ruamel.yaml
 """
 
 Pre computed values for the mathematical model of clusters.
@@ -13,13 +13,20 @@ These are results taken from the regression of data points
 depicted in the previous paper on classical control logic.
  
 """
-a = {'gros': 0.83, 'dahu': 0.94, 'yeti': 0.89, 'CC_cluster':0.95}
-b = {'gros': 7.07, 'dahu': 0.17, 'yeti': 2.91, 'CC_cluster':-0.08}
-alpha = {'gros': 0.047, 'dahu': 0.032, 'yeti': 0.023, 'CC_cluster':0.134}
-beta = {'gros': 28.5, 'dahu': 34.8, 'yeti': 33.7, 'CC_cluster':28.7}
-K_L = {'gros': 25.6, 'dahu': 42.4, 'yeti': 78.5, 'CC_cluster':8.9}
+experiment_dir = '/home/cc/compare_control_methods/'
+yaml_format = ruamel.yaml.YAML()
+with open(experiment_dir+'experiment_data/params.yaml') as files:
+    CC_parameters = yaml_format.load(files)
+files.close()
+
+a = {'gros': 0.83, 'dahu': 0.94, 'yeti': 0.89, 'CC_cluster':CC_parameters['rapl']['slope']}
+b = {'gros': 7.07, 'dahu': 0.17, 'yeti': 2.91, 'CC_cluster':CC_parameters['rapl']['offset']}
+alpha = {'gros': 0.047, 'dahu': 0.032, 'yeti': 0.023, 'CC_cluster':CC_parameters['model']['alpha']}
+beta = {'gros': 28.5, 'dahu': 34.8, 'yeti': 33.7, 'CC_cluster':CC_parameters['model']['beta']}
+K_L = {'gros': 25.6, 'dahu': 42.4, 'yeti': 78.5, 'CC_cluster':CC_parameters['model']['gain']}
 tau = 0.33
 
+# print(a,"----",b,"----",alpha,"----",beta,"----",K_L)
 
 cluster = 'CC_cluster'                                                                                                        # The cluster of choice {'dahu','gros','yeti'}
 """
@@ -223,11 +230,11 @@ if __name__ == "__main__":
     fig, axs = plt.subplots(2)
     fig.suptitle('power and performance against time')
     # C1_vals = [1]
-    C0_vals = np.linspace(0, 5, 5)
+    C0_vals = np.linspace(0, 10, 10)
     # C0_vals = [3]
     # C1_vals = np.linspace(0,20,20)
     # C2_vals = np.linspace(0,20,20)
-    C3_vals = np.linspace(0, 5, 5)
+    C3_vals = np.linspace(0, 10, 10)
     for i in C0_vals:
         # for j in C1_vals:
         #     for k in C2_vals:

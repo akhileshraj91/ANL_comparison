@@ -22,14 +22,8 @@ import pickle
 
 
 exp_type = 'controller'  # ex: 'stairs' 'identification' 'static_characteristic' 'controller' XXX
-# experiment_dir = os.getcwd() + '/Documents/ctrl-rapl/euro-par-2021-artifacts/dataset/'+exp_type+'/experiments-data/' # XXX
 experiment_dir = '/home/cc/compare_control_methods/experiment_data/'
-# experiment_dir = '/Users/akhilesh/Desktop/europar-96-artifacts/dataset/' + exp_type + '/experiments-data/'
 clusters = next(os.walk(experiment_dir))[1]  # clusters are name of folders
-# if (exp_type == 'stairs') or (exp_type == 'static_characteristic'):
-#     experiment_type = 'controller'
-# else:
-#     experiment_type = exp_type
 experiment_type = 'controller'
 cluster = 'CC_RL_control'
 traces = {}
@@ -51,7 +45,7 @@ data = {}
 data[cluster] = {}
 
 for trace in traces[cluster][0]:
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",trace)
+    # print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",trace)
     data[cluster][trace] = {}
     folder_path = experiment_dir + cluster + '/' + trace
     # Trace experimental plan: parameters or log
@@ -62,8 +56,8 @@ for trace in traces[cluster][0]:
     if os.path.isfile(folder_path + '/parameters.yaml'):
         with open(folder_path + "/parameters.yaml") as file:
             data[cluster][trace]['parameters'] = yaml.load(file, Loader=yaml.FullLoader)
-            with open(folder_path + '/' + data[cluster][trace]['parameters']['config-file']) as file:
-                data[cluster][trace]['parameters']['config-file'] = yaml.load(file, Loader=yaml.FullLoader)
+            # with open(folder_path + '/' + data[cluster][trace]['parameters']['config-file']) as file:
+                # data[cluster][trace]['parameters']['config-file'] = yaml.load(file, Loader=yaml.FullLoader)
     data[cluster][trace]['identification-runner-log'] = pd.read_csv(
         folder_path + "/" + experiment_type + "-runner.log", sep='\0',
         names=['created', 'levelname', 'process', 'funcName', 'message'])
@@ -73,6 +67,9 @@ for trace in traces[cluster][0]:
     data[cluster][trace]['enforce_powercap']['powercap'] = [
         ''.join(c for c in data[cluster][trace]['enforce_powercap']['message'][i] if c.isdigit()) for i in
         data[cluster][trace]['enforce_powercap'].index]
+    all_files = os.listdir(folder_path)
+    data[cluster][trace]['weights'] = [file for file in all_files if os.path.isfile(os.path.join(folder_path, file)) and file.startswith('dynamics')]
+    print(">>>>>>>>>>>>>>>",data[cluster][trace]['weights'])
     # Loading sensors data files
     pubMeasurements = pd.read_csv(folder_path + "/dump_pubMeasurements.csv")
     pubProgress = pd.read_csv(folder_path + "/dump_pubProgress.csv")
@@ -134,9 +131,10 @@ for trace in traces[cluster][0]:
         [rapl_elapsed_time[t] - rapl_elapsed_time[t - 1] for t in range(1, len(rapl_elapsed_time))],
         index=[rapl_elapsed_time[t] for t in range(1, len(rapl_elapsed_time))], columns=['periods'])
     # Progress
+    Progress_data = data[cluster][trace]['performance_sensors'].loc[:,'progress'].values.copy()
     performance_elapsed_time = data[cluster][trace]['performance_sensors'].index
     data[cluster][trace]['aggregated_values']['performance_frequency'] = pd.DataFrame(
-        [1 / (performance_elapsed_time[t] - performance_elapsed_time[t - 1]) for t in
+        [Progress_data[t] / (performance_elapsed_time[t] - performance_elapsed_time[t - 1]) for t in
          range(1, len(performance_elapsed_time))],
         index=[performance_elapsed_time[t] for t in range(1, len(performance_elapsed_time))], columns=['frequency'])
     # Execution time:
@@ -199,14 +197,14 @@ pareto = {}
 
 for trace in traces[cluster][0]:
     data[cluster][trace]['aggregated_values']['energy'] = np.nansum([np.nansum([data[cluster][trace]['rapl_sensors']['value'+str(package_number)].iloc[i+1]*data[cluster][trace]['aggregated_values']['rapls_periods'].iloc[i][0] for i in range(0,len(data[cluster][trace]['aggregated_values']['rapls_periods'].index))]) for package_number in range(0,4)])
-pareto[cluster] = pd.DataFrame({'Execution Time':[data[cluster][trace]['aggregated_values']['progress_frequency_median']['median'].index[-1] for trace in traces[cluster][0]],'setpoint':[data[cluster][trace]['parameters']['config-file']['controller']['setpoint'] for trace in traces[cluster][0]]},index=[data[cluster][trace]['aggregated_values']['energy']/10**3 for trace in traces[cluster][0]])
+pareto[cluster] = pd.DataFrame({'Execution Time':[data[cluster][trace]['aggregated_values']['progress_frequency_median']['median'].index[-1] for trace in traces[cluster][0]]},index=[data[cluster][trace]['aggregated_values']['energy']/10**3 for trace in traces[cluster][0]])
 pareto[cluster].sort_index(inplace=True)
 
 # FIGURE 7
 cmap = cm.get_cmap('viridis')
 
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(6.6,6.6))
-cb = axes.scatter(pareto[cluster].index,pareto[cluster]['Execution Time'], marker='.', c=(1-pareto[cluster]['setpoint']), cmap=cmap, s=30)
+cb = axes.scatter(pareto[cluster].index,pareto[cluster]['Execution Time'], marker='.',s=30)
 #plt.show()
 plt.colorbar(cb,label='Degradation $\epsilon$ [unitless]')
 axes.grid(True)
