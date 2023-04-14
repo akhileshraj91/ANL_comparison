@@ -105,9 +105,9 @@ do
 		snapshot_system_state "${archive}" 'post'
 		# compress archive
 		xz --compress "${archive}"
-		sleep 10
+		sleep 5
 		python ./increased_sampling_rate/enforce_max_power.py ./increased_sampling_rate/max-range-config.yaml
-        	sleep 5
+        	sleep 10
 		echo __________________________________________________________________________________________________
 	fi
 
