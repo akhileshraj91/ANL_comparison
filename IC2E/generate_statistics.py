@@ -219,13 +219,18 @@ for cluster in clusters:
     pareto[cluster].sort_index(inplace=True)
     time_stat = pareto[cluster].describe(include='all')
     energy_stat = pareto[cluster].reset_index()['index'].describe()
+<<<<<<< HEAD
     my_dict[cluster] = {'energy':{'mean':float(energy_stat.loc['mean']),'sigma':float(energy_stat.loc['std'])},'performance':{'mean':float(time_stat.loc['std']['Execution Time']),'sigma':float(time_stat.loc['std']['Execution Time'])}}
     print(energy_stat.loc['mean'],energy_stat.loc['std'],">>>>>>>>",time_stat.loc['mean']['Execution Time'],time_stat.loc['std']['Execution Time'])
     axes.scatter(float(energy_stat.loc['mean']),float(time_stat.loc['mean']['Execution Time']),marker=marker_index[cluster],s=30, color='k',label="MEAN operating region for "+ str(cluster)+ "PCAP")
+=======
+    print(energy_stat.loc['mean'],energy_stat.loc['std'],">>>>>>>>",time_stat.loc['mean']['Execution Time'],time_stat.loc['std']['Execution Time'])
+    axes.scatter(float(energy_stat.loc['mean']),float(time_stat.loc['mean']['Execution Time']),marker=marker_index[cluster],s=30, color='k',label="MEAN operating region for "+ str(cluster)+ " PCAP")
+>>>>>>> 7b6cae5c5f332983df7d4a6f1b7f1bf60c4730d2
     # FIGURE 7
     # cmap = cm.get_cmap('viridis')
 
-    cb = axes.scatter(pareto[cluster].index,pareto[cluster]['Execution Time'], marker='.',s=30, color=color_index[cluster],label=str(cluster)+"PCAP")
+    cb = axes.scatter(pareto[cluster].index,pareto[cluster]['Execution Time'], marker='.',s=30, color=color_index[cluster],label=str(cluster)+" PCAP")
     #plt.show()
     # plt.plot(cb)
     axes.grid(True)

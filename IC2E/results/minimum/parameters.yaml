@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 timestamp: 2023-04-23T15:33:56+00:00
+=======
+timestamp: 2023-04-23T07:54:31+00:00
+>>>>>>> 7b6cae5c5f332983df7d4a6f1b7f1bf60c4730d2
 runner: 
 config-file: dynamics_1.1111111111111112___2.2222222222222223
 benchmark: stream_c
