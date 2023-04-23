@@ -230,11 +230,11 @@ if __name__ == "__main__":
     fig, axs = plt.subplots(2)
     fig.suptitle('power and performance against time')
     # C1_vals = [1]
-    C0_vals = np.linspace(0, 10, 10)
+    C0_vals = np.linspace(0, 5, 5)
     # C0_vals = [3]
     # C1_vals = np.linspace(0,20,20)
     # C2_vals = np.linspace(0,20,20)
-    C3_vals = np.linspace(0, 10, 10)
+    C3_vals = np.linspace(0, 5, 5)
     for i in C0_vals:
         # for j in C1_vals:
         #     for k in C2_vals:

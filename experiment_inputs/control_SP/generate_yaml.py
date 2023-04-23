@@ -10,7 +10,7 @@ import numpy as np
 import tarfile
 yaml = YAML()
 
-experiment_dir = '/home/cc/compare_control_methods/'
+experiment_dir = '/home/cc/ANL_comparison/'
 
 with open(experiment_dir+'experiment_data/params.yaml') as files:
     parameters = yaml.load(files)
