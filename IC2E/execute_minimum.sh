@@ -113,7 +113,7 @@ count=1
 for cfg in "$DATADIR"/*
 do
 	if [[ ${cfg} == *"dynamics"* ]]; then
-		while [ $count -le 10 ]
+		while [ $count -le 1 ]
 		do
 			echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${cfg}"
 			timestamp="$(date --iso-8601=seconds)"
