@@ -1,0 +1,22 @@
+!!omap
+- minimum:
+    energy:
+      mean: 47.44918166472967
+      sigma: 1.1740679468532214
+    performance:
+      mean: 12.536613046060992
+      sigma: 12.536613046060992
+- optimal:
+    energy:
+      mean: 48.33135242925104
+      sigma: 0.7484215823465474
+    performance:
+      mean: 4.110960958218892
+      sigma: 4.110960958218892
+- maximum:
+    energy:
+      mean: 60.6920510685708
+      sigma: 1.1510316211617602
+    performance:
+      mean: 4.737556801183965
+      sigma: 4.737556801183965

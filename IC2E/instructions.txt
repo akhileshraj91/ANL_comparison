@@ -1,0 +1,3 @@
+bash execute_maximum.sh
+bash execute_minimum.sh
+bash execute_optimal.sh

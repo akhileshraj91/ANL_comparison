@@ -21,6 +21,12 @@ import seaborn as sns
 import pickle
 import statistics
 import datetime
+from ruamel.yaml import YAML
+from collections import OrderedDict
+my_dict = OrderedDict()
+yaml_alt = YAML()
+
+
 
 
 experiment_dir = './results/'
@@ -213,7 +219,8 @@ for cluster in clusters:
     pareto[cluster].sort_index(inplace=True)
     time_stat = pareto[cluster].describe(include='all')
     energy_stat = pareto[cluster].reset_index()['index'].describe()
-    print(energy_stat.loc['mean'],">>>>>>>>",time_stat.loc['mean']['Execution Time'])
+    my_dict[cluster] = {'energy':{'mean':float(energy_stat.loc['mean']),'sigma':float(energy_stat.loc['std'])},'performance':{'mean':float(time_stat.loc['std']['Execution Time']),'sigma':float(time_stat.loc['std']['Execution Time'])}}
+    print(energy_stat.loc['mean'],energy_stat.loc['std'],">>>>>>>>",time_stat.loc['mean']['Execution Time'],time_stat.loc['std']['Execution Time'])
     axes.scatter(float(energy_stat.loc['mean']),float(time_stat.loc['mean']['Execution Time']),marker=marker_index[cluster],s=30, color='k',label="MEAN operating region for "+ str(cluster)+ "PCAP")
     # FIGURE 7
     # cmap = cm.get_cmap('viridis')
@@ -225,7 +232,8 @@ for cluster in clusters:
     axes.set_ylabel('Execution time [s]',fontsize=14)
     axes.set_xlabel('Energy consumption [kJ]',fontsize=14)
     axes.legend()
-
+with open('./stats.yaml','w') as fil:
+    yaml_alt.dump(my_dict,fil)
 # afile = open(r'data_dir'+str(cluster),'wb')
 # bfile = open(r'trace_dir'+str(cluster),'wb')
 # pickle.dump(data, afile)
