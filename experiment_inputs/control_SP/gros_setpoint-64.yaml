@@ -5,18 +5,12 @@ rapl:
   offset: 0.15
 
 model:
-<<<<<<< HEAD
-  alpha: 0.041
-  beta: 24.3
-  gain: 47.9
-=======
   alpha: 0.04
   beta: 24.2
   gain: 48.6
->>>>>>> cf8a41bb54fa4fb6f201bc6f139e4597b66b1cdb
   time-constant: 0.33
 
 controller:
-  setpoint: 0.53
+  setpoint: 0.64
   response-time: 30
   power-range: [40, 120]

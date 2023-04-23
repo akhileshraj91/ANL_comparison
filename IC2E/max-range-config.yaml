@@ -1,9 +1,5 @@
 version: 1
-<<<<<<< HEAD
-  
-=======
 
->>>>>>> cf8a41bb54fa4fb6f201bc6f139e4597b66b1cdb
 rapl:
   slope: 0.83
   offset: 7.07
@@ -17,8 +13,4 @@ model:
 controller:
   setpoint: 0.5
   response-time: 30
-<<<<<<< HEAD
-  power-range: [40.0, 200.0] 
-=======
   power-range: [40.0, 200.0]
->>>>>>> cf8a41bb54fa4fb6f201bc6f139e4597b66b1cdb
