@@ -5,6 +5,5 @@ data_dirCC_control
 trace_dirCC_control
 models_backup/
 *.png
-*.yaml
 *.pdf
 *dirCC*
