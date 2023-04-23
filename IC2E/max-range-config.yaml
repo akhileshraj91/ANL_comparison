@@ -13,4 +13,4 @@ model:
 controller:
   setpoint: 0.5
   response-time: 30
-  power-range: [40.0, 200.0]
+  power-range: [50.0, 200.0]
