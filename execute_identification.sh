@@ -19,6 +19,13 @@ if [ ! -d "$OUTPUTDIR" ]; then
 	mkdir -p "$OUTPUTDIR"
 fi
 
+if [ -z "$1" ]; then
+  APPLICATION="ones-stream-full"
+else
+  APPLICATION="$1"
+fi
+
+
 declare -ra PRERUN_SNAPSHOT_FILES=(
         "${PARAMS_FILE}"
         "${TOPOLOGY_FILE}"
@@ -103,7 +110,7 @@ do
 		tar --append --file="${archive}" --transform='s,^.*/,,' -- "${cfg}"
 		tar --append --file="${archive}" --directory="${OUTPUTDIR}" -- "${PRERUN_SNAPSHOT_FILES[@]}"
 		snapshot_system_state "${archive}" 'pre'
-		python identification.py --enable-libnrm ${cfg} -- ones-stream-copy 33554422 10000
+		python identification.py --enable-libnrm ${cfg} -- $APPLICATION 33554422 10000
 		# retrieve benchmark logs and snapshot post-run state
 		tar --append --file="${archive}" --directory="${OUTPUTDIR}" -- "${POSTRUN_SNAPSHOT_FILES[@]}"
 		snapshot_system_state "${archive}" 'post'
