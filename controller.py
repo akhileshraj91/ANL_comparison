@@ -16,7 +16,11 @@ import cerberus
 import ruamel.yaml
 
 import nrm.tooling as nrm
+import os
 
+experiment_dir = '/home/cc/ANL_comparison/experiment_data/CC_control/'
+if not os.path.isdir(experiment_dir):
+    os.mkdir(experiment_dir)
 
 # frequency (in hertz) for RAPL sensor polling
 RAPL_SENSOR_FREQ = 1
@@ -43,7 +47,7 @@ LOGS_CONF = {
     'handlers': {
         'file': {
             'class': 'logging.FileHandler',
-            'filename': f'//home/cc/compare_control_methods/experiment_data/CC_control/{LOGGER_NAME}.log',
+            'filename': f'/home/cc/ANL_comparison/experiment_data/CC_control/{LOGGER_NAME}.log',
             'mode': 'w',
             'level': LOGS_LEVEL,
             'formatter': 'precise',
@@ -201,7 +205,7 @@ assert DUMPED_MSG_TYPES.issubset(CSV_FIELDS)
 
 def initialize_csvwriters(stack: contextlib.ExitStack):
     csvfiles = {
-        msg_type: stack.enter_context(open(f'/home/cc/compare_control_methods/experiment_data/CC_control/dump_{msg_type}.csv', 'w'))
+        msg_type: stack.enter_context(open(f'/home/cc/ANL_comparison/experiment_data/CC_control/dump_{msg_type}.csv', 'w'))
         for msg_type in DUMPED_MSG_TYPES
     }
 
@@ -365,6 +369,7 @@ class PIController:
         return (-math.log(-value) / self._model_alpha + self._model_beta - self._rapl_offset) / self._rapl_slope
 
     def control(self, csvwriters):
+        # print(self.daemon,self.daemon.all_finished())
         while not self.daemon.all_finished():
             msg = self.daemon.upstream_recv()  # blocking call
             dump_upstream_msg(csvwriters, msg)
@@ -592,4 +597,5 @@ def run(options, cmd):
 
 if __name__ == '__main__':
     options, cmd = cli()
+    # print(options,"___\n___",cmd)
     run(options, cmd)

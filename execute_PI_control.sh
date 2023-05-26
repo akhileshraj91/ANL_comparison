@@ -67,6 +67,10 @@ declare -rA RUNNERS_POSTRUN_SNAPSHOT_FILES=(
 	[identification]="identification-runner.log"
 )
 
+if [ ! -d "$OUTPUTDIR" ]; then
+	mkdir -p "$OUTPUTDIR"
+fi
+
 # helper functions  -----------------------------------------------------------
 
 function dump_parameters {
@@ -123,7 +127,7 @@ do
                 python controller.py ${cfg} -- ones-stream-full 33554432 10000
                 # retrieve benchmark logs and snapshot post-run state
                 tar --append --file="${archive}" --directory="${OUTPUTDIR}" -- "${POSTRUN_SNAPSHOT_FILES[@]}"
-		touch "${OUTPUTDIR}/SUCCESS"
+				touch "${OUTPUTDIR}/SUCCESS"
                 tar --append --file="${archive}" --directory="${OUTPUTDIR}" -- SUCCESS
                 snapshot_system_state "${archive}" 'post'
                 # compress archive

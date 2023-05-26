@@ -34,8 +34,11 @@ experiment_type = 'controller'
 cluster = 'CC_control'
 traces = {}
 traces_tmp = {}
-
 traces[cluster] = pd.DataFrame()
+
+# if not os.path.isdir(experiment_dir+cluster):
+#     os.mkdir(experiment_dir+cluster)
+
 if next(os.walk(experiment_dir + cluster))[1] == []:
     files = os.listdir(experiment_dir + cluster)
     for fname in files:

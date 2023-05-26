@@ -46,7 +46,7 @@ LOGS_CONF = {
     'handlers': {
         'file': {
             'class': 'logging.FileHandler',
-            'filename': f'//home/cc/compare_control_methods/experiment_data/CC_RL_control/{LOGGER_NAME}.log',
+            'filename': f'/home/cc/compare_control_methods/experiment_data/CC_RL_control/{LOGGER_NAME}.log',
             'mode': 'w',
             'level': LOGS_LEVEL,
             'formatter': 'precise',

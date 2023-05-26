@@ -13,7 +13,7 @@ These are results taken from the regression of data points
 depicted in the previous paper on classical control logic.
  
 """
-experiment_dir = '/home/cc/compare_control_methods/'
+experiment_dir = '/home/cc/ANL_comparison/'
 yaml_format = ruamel.yaml.YAML()
 with open(experiment_dir+'experiment_data/params.yaml') as files:
     CC_parameters = yaml_format.load(files)

@@ -11,9 +11,13 @@ declare -r OUTPUTDIR=./experiment_data/CC_identification
 declare -r BENCHMARK='stream_c'
 declare -r RUNNER='identification'
 declare -r PARAMS_FILE='parameters.yaml'
-declare -r ITERATION_COUNT='10_00'
+declare -r ITERATION_COUNT='10_000'
 declare -r PROBLEM_SIZE='33_554_432'
 declare -r TOPOLOGY_FILE='topology.xml'
+
+if [ ! -d "$OUTPUTDIR" ]; then
+	mkdir -p "$OUTPUTDIR"
+fi
 
 declare -ra PRERUN_SNAPSHOT_FILES=(
         "${PARAMS_FILE}"
@@ -99,7 +103,7 @@ do
 		tar --append --file="${archive}" --transform='s,^.*/,,' -- "${cfg}"
 		tar --append --file="${archive}" --directory="${OUTPUTDIR}" -- "${PRERUN_SNAPSHOT_FILES[@]}"
 		snapshot_system_state "${archive}" 'pre'
-		python identification.py --enable-libnrm ${cfg} -- ones-stream-full 33554422 10000
+		python identification.py --enable-libnrm ${cfg} -- ones-stream-copy 33554422 10000
 		# retrieve benchmark logs and snapshot post-run state
 		tar --append --file="${archive}" --directory="${OUTPUTDIR}" -- "${POSTRUN_SNAPSHOT_FILES[@]}"
 		snapshot_system_state "${archive}" 'post'
