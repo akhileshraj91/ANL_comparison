@@ -6,8 +6,16 @@ export LC_ALL=C  # ensure we are working with known locales
 
 declare -r PROGRAM=${0##*/}
 
+
+if [ -z "$1" ]; then
+  APPLICATION="ones-stream-full"
+else
+  APPLICATION="$1"
+fi
+
+
 declare -r DATADIR=./experiment_inputs/identification_inputs
-declare -r OUTPUTDIR=./experiment_data/CC_identification
+declare -r OUTPUTDIR=./experiment_data/${APPLICATION}_identification
 declare -r BENCHMARK='stream_c'
 declare -r RUNNER='identification'
 declare -r PARAMS_FILE='parameters.yaml'
@@ -19,11 +27,7 @@ if [ ! -d "$OUTPUTDIR" ]; then
 	mkdir -p "$OUTPUTDIR"
 fi
 
-if [ -z "$1" ]; then
-  APPLICATION="ones-stream-full"
-else
-  APPLICATION="$1"
-fi
+
 
 
 declare -ra PRERUN_SNAPSHOT_FILES=(
@@ -110,7 +114,7 @@ do
 		tar --append --file="${archive}" --transform='s,^.*/,,' -- "${cfg}"
 		tar --append --file="${archive}" --directory="${OUTPUTDIR}" -- "${PRERUN_SNAPSHOT_FILES[@]}"
 		snapshot_system_state "${archive}" 'pre'
-		python identification.py --enable-libnrm ${cfg} -- $APPLICATION 33554422 10000
+		python identification.py --enable-libnrm ${cfg} -- $APPLICATION 33554422 100
 		# retrieve benchmark logs and snapshot post-run state
 		tar --append --file="${archive}" --directory="${OUTPUTDIR}" -- "${POSTRUN_SNAPSHOT_FILES[@]}"
 		snapshot_system_state "${archive}" 'post'

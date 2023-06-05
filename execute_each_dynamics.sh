@@ -61,6 +61,16 @@ declare -a POSTRUN_SNAPSHOT_FILES=(
 	#time-metrics.csv
 )
 
+if [ ! -d "$OUTPUTDIR" ]; then
+	mkdir -p "$OUTPUTDIR"
+fi
+
+if [ -z "$1" ]; then
+  APPLICATION="ones-stream-full"
+else
+  APPLICATION="$1"
+fi
+
 # runner-specific files to snapshot once the experiment is done
 declare -rA RUNNERS_POSTRUN_SNAPSHOT_FILES=(
 	[controller]="controller-runner.log"
@@ -121,7 +131,7 @@ do
                 tar --append --file="${archive}" --transform='s,^.*/,,' -- "${cfg}"
                 tar --append --file="${archive}" --directory="${OUTPUTDIR}" -- "${PRERUN_SNAPSHOT_FILES[@]}"
                 snapshot_system_state "${archive}" 'pre'
-                python ./increased_sampling_rate/RL_model_hardware.py ./increased_sampling_rate/max-range-config.yaml -- ones-stream-full 33554432 10000 ${cfg}
+                python ./increased_sampling_rate/RL_model_hardware.py ./increased_sampling_rate/max-range-config.yaml -- $APPLICATION 33554432 10000 ${cfg}
                 # retrieve benchmark logs and snapshot post-run state
                 tar --append --file="${archive}" --directory="${OUTPUTDIR}" -- "${POSTRUN_SNAPSHOT_FILES[@]}"
 		        touch "${OUTPUTDIR}/SUCCESS"

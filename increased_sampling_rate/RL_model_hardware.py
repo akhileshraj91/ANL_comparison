@@ -46,7 +46,7 @@ LOGS_CONF = {
     'handlers': {
         'file': {
             'class': 'logging.FileHandler',
-            'filename': f'/home/cc/compare_control_methods/experiment_data/CC_RL_control/{LOGGER_NAME}.log',
+            'filename': f'/home/cc/ANL_comparison/experiment_data/CC_RL_control/{LOGGER_NAME}.log',
             'mode': 'w',
             'level': LOGS_LEVEL,
             'formatter': 'precise',
@@ -204,7 +204,7 @@ assert DUMPED_MSG_TYPES.issubset(CSV_FIELDS)
 
 def initialize_csvwriters(stack: contextlib.ExitStack):
     csvfiles = {
-        msg_type: stack.enter_context(open(f'/home/cc/compare_control_methods/experiment_data/CC_RL_control/dump_{msg_type}.csv', 'w'))
+        msg_type: stack.enter_context(open(f'/home/cc/ANL_comparison/experiment_data/CC_RL_control/dump_{msg_type}.csv', 'w'))
         for msg_type in DUMPED_MSG_TYPES
     }
 

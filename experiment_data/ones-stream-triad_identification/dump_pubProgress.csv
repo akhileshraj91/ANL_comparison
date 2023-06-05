@@ -1,0 +1,9 @@
+msg.timestamp,msg.id,msg.type,sensor.cmd,sensor.task,sensor.rank,sensor.pid,sensor.tid,sensor.value
+1685555465.109219,4f02df8e-1a45-4dc8-8ca5-57e42ac75c24,pubProgress,b60cdf70-ffdb-11ed-8001-246e9662c1da,ones-stream-triad,0,2241880,0,11
+1685555465.2174892,1334e937-4854-4b25-a1a1-8a5ae5c0f4a0,pubProgress,b60cdf70-ffdb-11ed-8001-246e9662c1da,ones-stream-triad,0,2241880,0,9
+1685555465.3179374,ee2ce179-d491-4601-b4c8-316fde3ba54a,pubProgress,b60cdf70-ffdb-11ed-8001-246e9662c1da,ones-stream-triad,0,2241880,0,9
+1685555465.4226565,42fb5496-78c3-4612-94fd-ca848f0d1f24,pubProgress,b60cdf70-ffdb-11ed-8001-246e9662c1da,ones-stream-triad,0,2241880,0,9
+1685555465.530099,7e582c0a-b650-4d01-830f-e7bd8f8a988e,pubProgress,b60cdf70-ffdb-11ed-8001-246e9662c1da,ones-stream-triad,0,2241880,0,6
+1685555465.636564,4a522c4f-cbcb-48b8-b7ca-f1a957777f13,pubProgress,b60cdf70-ffdb-11ed-8001-246e9662c1da,ones-stream-triad,0,2241880,0,13
+1685555465.7435071,a5ea9742-8855-47f8-af10-5c4acd687f63,pubProgress,b60cdf70-ffdb-11ed-8001-246e9662c1da,ones-stream-triad,0,2241880,0,12
+1685555465.7526102,e893498e-b10e-48af-87ec-75decc0a3949,pubProgress,b60cdf70-ffdb-11ed-8001-246e9662c1da,ones-stream-triad,0,2241880,0,1

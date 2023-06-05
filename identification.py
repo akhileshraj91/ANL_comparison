@@ -36,38 +36,41 @@ LOGGER_NAME = 'identification-runner'
 
 LOGS_LEVEL = 'INFO'
 
-LOGS_CONF = {
-    'version': 1,
-    'formatters': {
-        'precise': {
-            # timestamp is epoch in seconds
-            'format': '{created}\u0000{levelname}\u0000{process}\u0000{funcName}\u0000{message}',
-            'style': '{',
+def logs_conf_func():
+    LOGS_CONF = {
+        'version': 1,
+        'formatters': {
+            'precise': {
+                # timestamp is epoch in seconds
+                'format': '{created}\u0000{levelname}\u0000{process}\u0000{funcName}\u0000{message}',
+                'style': '{',
+            },
         },
-    },
-    'handlers': {
-        'file': {
-            'class': 'logging.FileHandler',
-            'filename': f'./experiment_data/CC_identification/{LOGGER_NAME}.log',
-            'mode': 'w',
-            'level': LOGS_LEVEL,
-            'formatter': 'precise',
-            'filters': [],
+        'handlers': {
+            'file': {
+                'class': 'logging.FileHandler',
+                'filename': f'./experiment_data/{WORKLOAD}_identification/{LOGGER_NAME}.log',
+                'mode': 'w',
+                'level': LOGS_LEVEL,
+                'formatter': 'precise',
+                'filters': [],
+            },
         },
-    },
-    'loggers': {
-        LOGGER_NAME: {
-            'level': LOGS_LEVEL,
-            'handlers': [
-                'file',
-            ],
+        'loggers': {
+            LOGGER_NAME: {
+                'level': LOGS_LEVEL,
+                'handlers': [
+                    'file',
+                ],
+            },
         },
-    },
-}
+    }
 
-logging.config.dictConfig(LOGS_CONF)
+    logging.config.dictConfig(LOGS_CONF)
 
-logger = logging.getLogger(LOGGER_NAME)
+
+    logger = logging.getLogger(LOGGER_NAME)
+    return LOGS_CONF, logger
 
 
 # experiment plan validation/load  ############################################
@@ -207,7 +210,7 @@ assert DUMPED_MSG_TYPES.issubset(CSV_FIELDS)
 
 def initialize_csvwriters(stack: contextlib.ExitStack):
     csvfiles = {
-        msg_type: stack.enter_context(open(f'./experiment_data/CC_identification/dump_{msg_type}.csv', 'w'))
+        msg_type: stack.enter_context(open(f'./experiment_data/{WORKLOAD}_identification/dump_{msg_type}.csv', 'w'))
         for msg_type in DUMPED_MSG_TYPES
     }
 
@@ -520,4 +523,6 @@ def run(options, cmd):
 
 if __name__ == '__main__':
     options, cmd = cli()
+    WORKLOAD = cmd[0]
+    LOGS_CONF, logger = logs_conf_func()
     run(options, cmd)

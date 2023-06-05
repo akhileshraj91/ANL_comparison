@@ -23,18 +23,18 @@ import yaml
 yaml_format = ruamel.yaml.YAML()
 warnings.filterwarnings('ignore')
 
-
+cluster_num = 0
 
 # =============================================================================
 # Experiment selection and load data
 # =============================================================================
 # Getting the right paths
-exp_type = 'static_characteristic' # ex: 'stairs' 'identification' 'static_characteristic' 'controller' XXX
+exp_type = 'identification' # ex: 'stairs' 'identification' 'static_characteristic' 'controller' XXX
 #experiment_dir = '/home/cc/europar-96-artifacts/dataset/'+exp_type+'/experiments-data/' # XXX
 #print(experiment_dir,"...")
 experiment_dir = './experiment_data/'
 #clusters = next(os.walk(experiment_dir))[1] # clusters are name of folders
-clusters = ['CC_identification']
+clusters = [item for item in next(os.walk(experiment_dir))[1] if exp_type in item]
 print(clusters)
 if (exp_type == 'stairs') or (exp_type == 'static_characteristic'):
     experiment_type = 'identification'
@@ -185,7 +185,7 @@ for cluster in clusters:
         axes[1].grid(True)
         axes[1].set_xlim(x_zoom)
 
-plt.savefig('fig_3.pdf')
+    plt.savefig(f'fig_3_{cluster}.pdf')
 # =============================================================================
 # STATIC CHARACTERISTIC
 # =============================================================================
@@ -215,7 +215,7 @@ for cluster in clusters:
   
 
 
-print("____________",prequestedvsmeasured[cluster])
+    print("____________",prequestedvsmeasured[cluster])
 
 
 
@@ -230,7 +230,7 @@ power_parameters = {}
 r_squared_power_actuator = {}
 for cluster in clusters:
     # optimized params
-    power_parameters[cluster], power_parameters_cov = opt.curve_fit(powermodel, prequestedvsmeasured[cluster]['pcap_requested'], prequestedvsmeasured[cluster]['rapls'], p0=power_parameters0)     # /!\ model computed with package 0
+    power_parameters[cluster], power_parameters_cov = opt.curve_fit(powermodel, prequestedvsmeasured[cluster]['pcap_requested'], prequestedvsmeasured[cluster]['rapls'], p0=power_parameters0,maxfev=5000)     # /!\ model computed with package 0
     # Model
     power_model[cluster] = powermodel(prequestedvsmeasured[cluster]['pcap_requested'].loc[pmin:pmax], power_parameters[cluster][0], power_parameters[cluster][1]) # model with fixed alpha
 
@@ -258,14 +258,14 @@ for cluster in clusters:
     # init param
     power2perf_param0 = [0.04, (sc[cluster].at[sc[cluster].index[-1],elected_performance_sensor]+sc[cluster].at[sc[cluster].index[-2],elected_performance_sensor]+sc[cluster].at[sc[cluster].index[-3],elected_performance_sensor])/3, min(sc[cluster].index)]                                        # guessed params
     # Optimization
-    power2perf_param_opt, power2perf_param_cov = opt.curve_fit(power2perf, sc[cluster].index, sc[cluster][elected_performance_sensor], p0=power2perf_param0)     
+    power2perf_param_opt, power2perf_param_cov = opt.curve_fit(power2perf, sc[cluster].index, sc[cluster][elected_performance_sensor], p0=power2perf_param0,maxfev=5000)     
     power2perf_params[cluster] = power2perf_param_opt
     # Model
     pcap2perf_model[cluster] = pcap2perf(sc_requested[cluster].index, power_parameters[cluster][0], power_parameters[cluster][1], power2perf_params[cluster][1], power2perf_params[cluster][0], power2perf_params[cluster][2]) # model with optimized perfinf
 
 # plot style
-clusters_styles = {'yeti':'orange','gros':'black','dahu':'skyblue','CC_identification':'black'}
-clusters_markers = {'yeti':'o','gros':'x','dahu':'v','CC_identification':'x'}
+clusters_styles = {0:'orange',1:'black',2:'skyblue',3:'black'}
+clusters_markers = {0:'o',1:'x',2:'v',3:'x'}
 plt.rcParams.update({'font.size': 14})
 
 # FIGURE 4a
@@ -294,7 +294,7 @@ for cluster in clusters:
 axes[0].grid(True)
 axes[0].set_ylabel('Progress [Hz]')
 axes[0].set_xlabel('Powercap [W]')
-axes[0].set_ylim([0,80])
+axes[0].set_ylim([0,250])
 legend = []
 for cluster in clusters:
     legend += ['cluster: '+' - measures']
@@ -306,7 +306,7 @@ axes[0].legend(legend,fontsize='x-small',loc='upper right',ncol=1)
 # fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(6.6,6.6))
 for cluster in clusters:
     # Linear Pcap
-    axes[1].plot(-np.exp(-power2perf_params[cluster][0]*(power_parameters[cluster][0]*sc_requested[cluster].index+power_parameters[cluster][1]-power2perf_params[cluster][2])),sc_requested[cluster][elected_performance_sensor]- power2perf_params[cluster][1],color='red', marker=clusters_markers[cluster],linestyle='') # data (lin with fixed alpha = 0.04)
+    axes[1].plot(-np.exp(-power2perf_params[cluster][0]*(power_parameters[cluster][0]*sc_requested[cluster].index+power_parameters[cluster][1]-power2perf_params[cluster][2])),sc_requested[cluster][elected_performance_sensor]- power2perf_params[cluster][1],color='red', marker=clusters_markers[cluster_num],linestyle='') # data (lin with fixed alpha = 0.04)
     axes[1].plot(-np.exp(-power2perf_params[cluster][0]*(power_parameters[cluster][0]*sc_requested[cluster].index+power_parameters[cluster][1]-power2perf_params[cluster][2])),pcap2perf_model[cluster]-power2perf_params[cluster][1],color='black') # model 0.04
 axes[1].grid(True)
 axes[1].set_ylabel('Linearized Progress [Hz]')
@@ -332,39 +332,39 @@ for cluster in clusters:
     print('linear gain - K_L - [Hz]]: '+str(round(power2perf_params[cluster][1],1)))
 
 
-with open(r'./experiment_inputs/control_SP/gros_setpoint-53.yaml') as file:
-    parameters = yaml_format.load(file)
-    print(type(parameters), parameters)
-    parameters['rapl']['slope'] = float(round(power_parameters[cluster][0],2))
-    parameters['rapl']['offset'] = float(round(power_parameters[cluster][1],2))
-    parameters['model']['alpha'] = float(round(power2perf_params[cluster][0],3))
-    parameters['model']['beta'] = float(round(power2perf_params[cluster][2],1))
-    parameters['model']['gain'] = float(round(power2perf_params[cluster][1],1))
-    print(parameters)
+    with open(r'./experiment_inputs/control_SP/gros_setpoint-53.yaml') as file:
+        parameters = yaml_format.load(file)
+        print(type(parameters), parameters)
+        parameters['rapl']['slope'] = float(round(power_parameters[cluster][0],2))
+        parameters['rapl']['offset'] = float(round(power_parameters[cluster][1],2))
+        parameters['model']['alpha'] = float(round(power2perf_params[cluster][0],3))
+        parameters['model']['beta'] = float(round(power2perf_params[cluster][2],1))
+        parameters['model']['gain'] = float(round(power2perf_params[cluster][1],1))
+        # print(parameters)
 
-# # parameters = pd.DataFrame()
-# # parameters['version'] = 1
-# # parameters['rapl'] = pd.DataFrame()
-# # parameters['model'] = pd.DataFrame()
-# # parameters['controller'] = pd.DataFrame()
-# # parameters['rapl']['slope'] = round(power_parameters[cluster][0],2)
-# # parameters['rapl']['offset'] = round(power_parameters[cluster][1],2)
-# # parameters['model']['alpha'] = round(power2perf_params[cluster][0],3)
-# # parameters['model']['beta'] = round(power2perf_params[cluster][2],1)
-# # parameters['model']['gain'] = round(power2perf_params[cluster][1],1)
-# # parameters['model']['time-constant'] = round(0.33)
-# # parameters['controller']['setpoint'] = round(0.99)
-# # parameters['controller']['response-time'] = round(30)
-# # parameters['controller']['power-range'] = [40, 120]
-#
-# params = pd.DataFrame()
-# params.insert('version',1)
-# params.insert('rapl',['slope','offset'],[1,2])
+    # # parameters = pd.DataFrame()
+    # # parameters['version'] = 1
+    # # parameters['rapl'] = pd.DataFrame()
+    # # parameters['model'] = pd.DataFrame()
+    # # parameters['controller'] = pd.DataFrame()
+    # # parameters['rapl']['slope'] = round(power_parameters[cluster][0],2)
+    # # parameters['rapl']['offset'] = round(power_parameters[cluster][1],2)
+    # # parameters['model']['alpha'] = round(power2perf_params[cluster][0],3)
+    # # parameters['model']['beta'] = round(power2perf_params[cluster][2],1)
+    # # parameters['model']['gain'] = round(power2perf_params[cluster][1],1)
+    # # parameters['model']['time-constant'] = round(0.33)
+    # # parameters['controller']['setpoint'] = round(0.99)
+    # # parameters['controller']['response-time'] = round(30)
+    # # parameters['controller']['power-range'] = [40, 120]
+    #
+    # params = pd.DataFrame()
+    # params.insert('version',1)
+    # params.insert('rapl',['slope','offset'],[1,2])
 
 
 
-with open(r'./experiment_data/params.yaml','w') as file2:
-    yaml_format.dump(parameters, file2)
+    with open(f'./experiment_data/{cluster}_params.yaml','w') as file2:
+        yaml_format.dump(parameters, file2)
 
     
 # plt.show()    
